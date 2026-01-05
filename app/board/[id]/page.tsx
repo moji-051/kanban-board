@@ -4,33 +4,27 @@ import { useState,useEffect } from "react";
 import ColumnType from "@/app/lib/columnType";
 import { Plus, Trash2 } from "lucide-react";
 import Card from "@/app/components/card";
-import { useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 
 export default function BoardPage() {
-  const params = useSearchParams()
-  const activeId = params.get('columns')
+  const params = useParams();
+  const boardId = params.id;
 
-  const [columns, setColumns] = useState<ColumnType[]>([]);
+  const [columns, setColumns] = useState<ColumnType[]>(() => {
+    if (typeof window !== 'undefined'&&boardId) {
+      const saved = localStorage.getItem(`column-data-${boardId}`);
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
   const [titleColumn, setTitleClumn] = useState("");
 
-  useEffect(() => {
-  const saved = localStorage.getItem("column");
-  if (!saved) return;
-
-  const columnArray: ColumnType[] = JSON.parse(saved);
-  const found = columnArray.find(n => n.id === activeId);
-  })
 
   useEffect(() => {
-    const saved = localStorage.getItem("column");
-    if (saved) {
-      setColumns(JSON.parse(saved));
+    if(boardId){
+      localStorage.setItem(`column-data-${boardId}`, JSON.stringify(columns));
     }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("column", JSON.stringify(columns));
-  }, [columns]);
+  }, [columns,boardId]);
 
   const columnCreator = () => {
     if (!titleColumn.trim()) return;
@@ -67,7 +61,7 @@ export default function BoardPage() {
             key={column.id}
             className="flex flex-col gap-5 shadow-md shadow-slate-500 justify-between bg-slate-200 rounded-3xl mx-3 p-2 px-3 min-w-[280px]"
           >
-            <div className="bg-slate-100 my-3 shadow-md shadow-slate-500 flex justify-between rounded-2xl p-3">
+            <div className="bg-slate-100 mb-1 shadow-md shadow-slate-500 flex justify-between rounded-2xl p-3">
               <h1 className="w-full text-2xl mr-4">{column.title}</h1>
               <button
                 onClick={() => deleteColumn(column.id)}
@@ -77,7 +71,7 @@ export default function BoardPage() {
                 <Trash2 />
               </button>
             </div>
-            <div className="bg-slate-100 text-xl shadow-md shadow-slate-500 flex-col h-160 rounded-2xl p-2 overflow-auto">
+            <div className="bg-slate-100 text-xl shadow-md shadow-slate-500 flex-col h-150 rounded-2xl p-2 overflow-auto">
               <Card column={column}/>
             </div>
           </div>

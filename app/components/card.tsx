@@ -12,20 +12,14 @@ interface CardProps{
 export default function Card({column}:CardProps) {
 
   const [cards, setCards] = useState<CardType[]>(() => {
-    const saved = localStorage.getItem("cards");
+    const saved = localStorage.getItem("card-data");
     return saved ? JSON.parse(saved) : [];
   });
   const [titleCard, setTitleCard] = useState("");
 
   useEffect(() => {
-  const saved = localStorage.getItem("cards");
-  if (saved) {
-    setCards(JSON.parse(saved));
-  }}, []);
-
-    useEffect(() => {
-        localStorage.setItem("cards", JSON.stringify(cards));
-    }, [cards]);
+      localStorage.setItem("card-data", JSON.stringify(cards));
+  }, [cards]);
 
   const cardCreator = (columnId: string) => {
     if (!titleCard.trim()) return;

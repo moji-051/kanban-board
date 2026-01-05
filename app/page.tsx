@@ -1,25 +1,36 @@
 "use client"
 
 import { Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Board from "./lib/boardType";
 import { useRouter } from "next/navigation";
-import { useLocalStorage } from "./lib/useLocalStorage";
 
 export default function Home() {
-  const [boards, setBoards] = useLocalStorage<Board[]>("boards", []);
+  const [boards, setBoards] = useState<Board[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(`board-data`);
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
   const [title, setTitle] = useState("");
 
   const router = useRouter();
 
+  useEffect(() => {
+    localStorage.setItem(`board-data`, JSON.stringify(boards));
+  }, [boards]);
+
   const boardCreator = () => {
     if (!title.trim()) return;
+    const id = Date.now().toString();
     const newBoard: Board = {
       title: title,
-      id: Date.now().toString(),
+      id: id,
     };
     setBoards([...boards, newBoard]);
     setTitle("");
+    localStorage.setItem(`board-data-${id}`, JSON.stringify([]));
   };
 
   const deleteBoard = (id: string) => {
